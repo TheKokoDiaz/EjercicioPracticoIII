@@ -15,7 +15,8 @@ const categoryColors = {
 const expenseForm = document.getElementById('expense-form');
 const descriptionInput = document.getElementById('description');
 const amountInput = document.getElementById('amount');
-const categoryInput = document.getElementById('category'); // NUEVO
+const categoryInput = document.getElementById('category');
+const dateInput = document.getElementById('date');
 const expenseList = document.getElementById('expense-list');
 const ctx = document.getElementById('expense-chart').getContext('2d');
 
@@ -42,22 +43,30 @@ let expenseChart = new Chart(ctx, {
     }
 });
 
-// Lógica para agregar un nuevo gasto (P2 - Tarea 2, + categoría P3)
+// Poner la fecha de hoy por defecto al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+});
+
+// Lógica para agregar un nuevo gasto (P2 - Tarea 2, + categoría y fecha P3)
 expenseForm.addEventListener('submit', function(e) {
     e.preventDefault();
 
     const description = descriptionInput.value.trim();
     const amount = parseFloat(amountInput.value);
-    const category = categoryInput.value; // NUEVO
+    const category = categoryInput.value;
+    const date = dateInput.value;
 
-    if (description === '' || isNaN(amount) || amount <= 0 || category === '') return;
+    if (description === '' || isNaN(amount) || amount <= 0 || category === '' || date === '') return;
 
     // Crear el objeto del gasto
     const newExpense = {
         id: Date.now(),
         description: description,
         amount: amount,
-        category: category // NUEVO
+        category: category,
+        date: date
     };
 
     // Guardar en el arreglo global
@@ -67,15 +76,25 @@ expenseForm.addEventListener('submit', function(e) {
     renderExpenses();
     updateChart();
 
-    // Limpiar el formulario
+    // Limpiar el formulario (y volver a poner la fecha de hoy)
     expenseForm.reset();
+    dateInput.value = new Date().toISOString().split('T')[0];
 });
 
-// Renderizar la lista de gastos en HTML (con categoría, P3)
+// Función para dar formato legible a la fecha (dd/mm/yyyy)
+function formatDate(isoDate) {
+    const [year, month, day] = isoDate.split('-');
+    return `${day}/${month}/${year}`;
+}
+
+// Renderizar la lista de gastos en HTML (con categoría y fecha, P3)
 function renderExpenses() {
     expenseList.innerHTML = '';
 
-    expenses.forEach(expense => {
+    // Ordenar del más reciente al más antiguo
+    const sortedExpenses = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    sortedExpenses.forEach(expense => {
         const li = document.createElement('li');
         li.classList.add('expense-item');
 
@@ -84,6 +103,7 @@ function renderExpenses() {
                 ${expense.category}
             </span>
             <span class="expense-desc">${expense.description}</span>
+            <span class="expense-date">${formatDate(expense.date)}</span>
             <span class="expense-amount">$${expense.amount.toFixed(2)}</span>
         `;
 
