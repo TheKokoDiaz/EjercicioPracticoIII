@@ -2,6 +2,6 @@
 
 ## Roles:
 - P1: Julio Alfredo Vázquez Díaz
-- P2:
+- P2: Isai Salvador Santos Robles
 - P3:
 - P4:
