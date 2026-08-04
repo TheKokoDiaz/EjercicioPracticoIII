@@ -22,10 +22,15 @@ label {
     margin-bottom: 5px;
 }
 
-input {
+input,
+select {
     width: 100%;
     padding: 8px;
     box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
 }
 
 button {
@@ -44,4 +49,41 @@ button:hover {
 
 .chart-container {
     margin-top: 20px;
+}
+
+/* Lista de gastos con categoría (P3) */
+#expense-list {
+    list-style: none;
+    padding: 0;
+}
+
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    background: #fafafa;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #eee;
+}
+
+.expense-category {
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.expense-desc {
+    flex: 1;
+    text-align: left;
+}
+
+.expense-amount {
+    font-weight: bold;
+    color: #28a745;
 }
