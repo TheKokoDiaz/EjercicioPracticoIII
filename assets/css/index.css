@@ -47,87 +47,37 @@ button:hover {
     background-color: #218838;
 }
 
-/* Límite de gasto (P3 - EXTRA) */
-.limit-section {
-    margin-bottom: 20px;
-    padding: 12px;
-    background: #f9f9f9;
-    border-radius: 6px;
-    border: 1px solid #eee;
-}
-
-.limit-form-group {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.limit-form-group input {
-    flex: 1;
-}
-
-.limit-form-group button {
-    width: auto;
-    padding: 8px 14px;
-    background-color: #007bff;
-}
-
-.limit-form-group button:hover {
-    background-color: #0069d9;
-}
-
-#limit-status {
-    margin-top: 8px;
-    font-weight: bold;
-}
-
-.limit-ok {
-    color: #28a745;
-}
-
-.limit-warning {
-    color: #e0a800;
-}
-
-.limit-danger {
-    color: #dc3545;
-}
-
-/* Filtros por fecha */
 .filter-buttons {
     display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 10px;
     flex-wrap: wrap;
+    margin: 16px 0 12px;
 }
 
 .filter-button {
     flex: 1 1 auto;
-    width: auto;
-    padding: 8px;
-    background-color: #e9ecef;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f4f4f9;
     color: #333;
-    border: none;
-    border-radius: 4px;
+    font-weight: 600;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .filter-button:hover {
-    background-color: #dee2e6;
+    background: #e9edf7;
 }
 
 .filter-button.active {
-    background-color: #28a745;
+    background: #28a745;
     color: white;
+    border-color: #28a745;
 }
 
-.empty-message {
-    color: #999;
-    text-align: center;
-    font-style: italic;
-    justify-content: center;
+.chart-container {
+    margin-top: 20px;
 }
 
 /* Lista de gastos con categoría (P3) */
@@ -194,4 +144,38 @@ button:hover {
 
 .chart-container canvas {
     max-height: 320px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.filter-button {
+    flex: 1;
+    width: auto;
+    padding: 8px;
+    background-color: #e9ecef;
+    color: #333;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.filter-button:hover {
+    background-color: #dee2e6;
+}
+
+.filter-button.active {
+    background-color: #28a745;
+    color: white;
+}
+
+.empty-message {
+    color: #999;
+    text-align: center;
+    font-style: italic;
+    justify-content: center;
 }

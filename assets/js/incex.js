@@ -1,9 +1,6 @@
 // Arreglo global para almacenar los gastos
 const expenses = [];
 
-// Límite de gasto (P3 - EXTRA)
-let expenseLimit = null;
-
 // Colores por categoría (P3 - diseño)
 const categoryColors = {
     'Comida': '#FF6384',
@@ -23,11 +20,6 @@ const dateInput = document.getElementById('date');
 const expenseList = document.getElementById('expense-list');
 const filterButtons = document.querySelectorAll('.filter-button');
 const ctx = document.getElementById('expense-chart').getContext('2d');
-
-// Elementos del límite (P3 - EXTRA)
-const limitInput = document.getElementById('limit');
-const setLimitBtn = document.getElementById('set-limit-btn');
-const limitStatus = document.getElementById('limit-status');
 
 let activeFilter = 'week';
 
@@ -102,21 +94,7 @@ window.addEventListener('DOMContentLoaded', () => {
     dateInput.value = today;
 });
 
-// Guardar el límite de gasto (P3 - EXTRA)
-setLimitBtn.addEventListener('click', () => {
-    const value = parseFloat(limitInput.value);
-
-    if (isNaN(value) || value <= 0) {
-        limitStatus.textContent = 'Ingresa un límite válido.';
-        limitStatus.className = 'limit-warning';
-        return;
-    }
-
-    expenseLimit = value;
-    updateLimitStatus();
-});
-
-// Lógica para agregar un nuevo gasto (P2 - Tarea 2, + categoría, fecha y límite P3)
+// Lógica para agregar un nuevo gasto (P2 - Tarea 2, + categoría y fecha P3)
 expenseForm.addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -126,17 +104,6 @@ expenseForm.addEventListener('submit', function(e) {
     const date = dateInput.value;
 
     if (description === '' || isNaN(amount) || amount <= 0 || category === '' || date === '') return;
-
-    // Verificar si el gasto excede el límite disponible (P3 - EXTRA)
-    if (expenseLimit !== null) {
-        const totalActual = getTotalExpenses();
-        if (totalActual + amount > expenseLimit) {
-            const confirmar = confirm(
-                `Este gasto excede tu límite de $${expenseLimit.toFixed(2)}.\n¿Deseas agregarlo de todas formas?`
-            );
-            if (!confirmar) return;
-        }
-    }
 
     // Crear el objeto del gasto
     const newExpense = {
@@ -152,39 +119,11 @@ expenseForm.addEventListener('submit', function(e) {
 
     // Actualizar la lista filtrada de gastos (y la gráfica, dentro de renderExpenses)
     renderExpenses();
-    updateLimitStatus();
 
     // Limpiar el formulario (y volver a poner la fecha de hoy)
     expenseForm.reset();
     dateInput.value = new Date().toISOString().split('T')[0];
 });
-
-// Calcular el total gastado (P3 - EXTRA)
-function getTotalExpenses() {
-    return expenses.reduce((sum, expense) => sum + expense.amount, 0);
-}
-
-// Actualizar el mensaje de estado del límite (P3 - EXTRA)
-function updateLimitStatus() {
-    if (expenseLimit === null) {
-        limitStatus.textContent = '';
-        return;
-    }
-
-    const total = getTotalExpenses();
-    const restante = expenseLimit - total;
-
-    if (restante < 0) {
-        limitStatus.textContent = `¡Límite excedido por $${Math.abs(restante).toFixed(2)}!`;
-        limitStatus.className = 'limit-danger';
-    } else if (restante < expenseLimit * 0.2) {
-        limitStatus.textContent = `Cuidado: solo te quedan $${restante.toFixed(2)} de tu límite.`;
-        limitStatus.className = 'limit-warning';
-    } else {
-        limitStatus.textContent = `Disponible: $${restante.toFixed(2)} de $${expenseLimit.toFixed(2)}.`;
-        limitStatus.className = 'limit-ok';
-    }
-}
 
 // Función para dar formato legible a la fecha (dd/mm/yyyy)
 function formatDate(isoDate) {
@@ -228,4 +167,58 @@ function setActiveFilterButton(selectedButton) {
 setActiveFilterButton(document.querySelector('.filter-button.active') || filterButtons[0]);
 
 // Renderizar la lista de gastos en HTML (con categoría y fecha, P3)
-// y actualizar la gráfica
+// y actualizar la gráfica con los MISMOS datos filtrados (evita el bug de que no coincidían)
+function renderExpenses() {
+    expenseList.innerHTML = '';
+
+    const filteredExpenses = expenses
+        .filter(expense => isExpenseInFilter(expense, activeFilter))
+        .sort((a, b) => parseLocalDate(b.date) - parseLocalDate(a.date));
+
+    if (filteredExpenses.length === 0) {
+        expenseList.innerHTML = '<li class="expense-item empty-message">No hay gastos para este filtro.</li>';
+    } else {
+        filteredExpenses.forEach(expense => {
+            const li = document.createElement('li');
+            li.classList.add('expense-item');
+
+            li.innerHTML = `
+                <span class="expense-category" style="background-color: ${categoryColors[expense.category]}">
+                    ${expense.category}
+                </span>
+                <span class="expense-desc">${expense.description}</span>
+                <span class="expense-date">${formatDate(expense.date)}</span>
+                <span class="expense-amount">$${expense.amount.toFixed(2)}</span>
+            `;
+
+            expenseList.appendChild(li);
+        });
+    }
+
+    updateChart(filteredExpenses);
+}
+
+// Actualizar el resumen gráfico (P2 - Tarea 4), con colores por categoría (P3)
+// Ahora recibe los gastos ya filtrados, para que coincida con la lista visible
+function updateChart(filteredExpenses) {
+    const labels = filteredExpenses.map(expense => expense.description);
+    const data = filteredExpenses.map(expense => expense.amount);
+    const colors = filteredExpenses.map(expense => categoryColors[expense.category]);
+
+    expenseChart.data.labels = labels;
+    expenseChart.data.datasets[0].data = data;
+    expenseChart.data.datasets[0].backgroundColor = colors;
+    expenseChart.data.datasets[0].borderColor = colors;
+    expenseChart.data.datasets[0].hoverBackgroundColor = colors.map(c => c + 'cc');
+    expenseChart.update();
+}
+
+filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        activeFilter = button.dataset.filter;
+        setActiveFilterButton(button);
+        renderExpenses();
+    });
+});
+
+renderExpenses();
