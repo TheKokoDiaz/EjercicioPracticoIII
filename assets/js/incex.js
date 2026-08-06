@@ -117,9 +117,8 @@ expenseForm.addEventListener('submit', function(e) {
     // Guardar en el arreglo global
     expenses.push(newExpense);
 
-    // Actualizar la lista filtrada de gastos
+    // Actualizar la lista filtrada de gastos (y la gráfica, dentro de renderExpenses)
     renderExpenses();
-    updateChart();
 
     // Limpiar el formulario (y volver a poner la fecha de hoy)
     expenseForm.reset();
@@ -168,6 +167,7 @@ function setActiveFilterButton(selectedButton) {
 setActiveFilterButton(document.querySelector('.filter-button.active') || filterButtons[0]);
 
 // Renderizar la lista de gastos en HTML (con categoría y fecha, P3)
+// y actualizar la gráfica con los MISMOS datos filtrados (evita el bug de que no coincidían)
 function renderExpenses() {
     expenseList.innerHTML = '';
 
@@ -177,37 +177,39 @@ function renderExpenses() {
 
     if (filteredExpenses.length === 0) {
         expenseList.innerHTML = '<li class="expense-item empty-message">No hay gastos para este filtro.</li>';
-        return;
+    } else {
+        filteredExpenses.forEach(expense => {
+            const li = document.createElement('li');
+            li.classList.add('expense-item');
+
+            li.innerHTML = `
+                <span class="expense-category" style="background-color: ${categoryColors[expense.category]}">
+                    ${expense.category}
+                </span>
+                <span class="expense-desc">${expense.description}</span>
+                <span class="expense-date">${formatDate(expense.date)}</span>
+                <span class="expense-amount">$${expense.amount.toFixed(2)}</span>
+            `;
+
+            expenseList.appendChild(li);
+        });
     }
 
-    filteredExpenses.forEach(expense => {
-        const li = document.createElement('li');
-        li.classList.add('expense-item');
-
-        li.innerHTML = `
-            <span class="expense-category" style="background-color: ${categoryColors[expense.category]}">
-                ${expense.category}
-            </span>
-            <span class="expense-desc">${expense.description}</span>
-            <span class="expense-date">${formatDate(expense.date)}</span>
-            <span class="expense-amount">$${expense.amount.toFixed(2)}</span>
-        `;
-
-        expenseList.appendChild(li);
-    });
+    updateChart(filteredExpenses);
 }
 
 // Actualizar el resumen gráfico (P2 - Tarea 4), con colores por categoría (P3)
-function updateChart() {
-    const labels = expenses.map(expense => expense.description);
-    const data = expenses.map(expense => expense.amount);
-    const colors = expenses.map(expense => categoryColors[expense.category]);
+// Ahora recibe los gastos ya filtrados, para que coincida con la lista visible
+function updateChart(filteredExpenses) {
+    const labels = filteredExpenses.map(expense => expense.description);
+    const data = filteredExpenses.map(expense => expense.amount);
+    const colors = filteredExpenses.map(expense => categoryColors[expense.category]);
 
     expenseChart.data.labels = labels;
     expenseChart.data.datasets[0].data = data;
     expenseChart.data.datasets[0].backgroundColor = colors;
     expenseChart.data.datasets[0].borderColor = colors;
-    expenseChart.data.datasets[0].hoverBackgroundColor = colors.map(c => c + 'cc'); // ligera transparencia al hover
+    expenseChart.data.datasets[0].hoverBackgroundColor = colors.map(c => c + 'cc');
     expenseChart.update();
 }
 
