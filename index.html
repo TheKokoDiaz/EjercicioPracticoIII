@@ -12,6 +12,16 @@
     <main class="container">
         <h1>Control de Gastos Diarios</h1>
 
+        <!-- Configuración de límite de gasto (P3 - EXTRA) -->
+        <section class="limit-section">
+            <h2>Límite de Gasto</h2>
+            <div class="form-group limit-form-group">
+                <input type="number" id="limit" step="0.01" min="0" placeholder="Ej: 2000">
+                <button type="button" id="set-limit-btn">Guardar Límite</button>
+            </div>
+            <p id="limit-status"></p>
+        </section>
+
         <!-- Formulario para ingresar gastos (P2 - Tarea 2, + categoría y fecha P3) -->
         <form id="expense-form">
             <div class="form-group">
