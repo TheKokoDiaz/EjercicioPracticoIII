@@ -12,6 +12,14 @@
     <main class="container">
         <h1>Control de Gastos Diarios</h1>
 
+        <!-- Límite de gasto (P3 - EXTRA) -->
+        <div class="form-group">
+            <label for="limit">Límite de gasto ($):</label>
+            <input type="number" id="limit" step="0.01" min="0" placeholder="Ej: 2000">
+            <button type="button" id="set-limit-btn">Guardar Límite</button>
+            <p id="limit-status"></p>
+        </div>
+
         <!-- Formulario para ingresar gastos (P2 - Tarea 2, + categoría y fecha P3) -->
         <form id="expense-form">
             <div class="form-group">
