@@ -14,6 +14,64 @@ const categoryColors = {
     'Otros': '#C9CBCF'
 };
 
+// ============================
+// 🔊 Motor de sonidos (Web Audio API)
+// No requiere archivos externos: genera los tonos en tiempo real
+// ============================
+let audioCtx = null;
+
+function getAudioContext() {
+    // Se crea al primer uso (los navegadores bloquean el AudioContext hasta una interacción del usuario)
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    return audioCtx;
+}
+
+// Reproduce una sola nota (oscilador) con un pequeño fade-out para que no truene
+function playTone(frequency, duration = 0.15, type = 'sine', delay = 0, volume = 0.2) {
+    const ctx = getAudioContext();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+
+    const startTime = ctx.currentTime + delay;
+    gainNode.gain.setValueAtTime(volume, startTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
+}
+
+// Catálogo de sonidos para las distintas acciones de la app
+const sounds = {
+    // Gasto agregado con éxito: dos notas ascendentes, alegres
+    success: () => {
+        playTone(523.25, 0.12, 'sine', 0);      // Do5
+        playTone(783.99, 0.18, 'sine', 0.1);    // Sol5
+    },
+    // Error de validación o límite excedido: nota grave y corta
+    warning: () => {
+        playTone(220, 0.25, 'sawtooth', 0, 0.15); // La3
+    },
+    // Límite guardado correctamente: sonido suave tipo "confirmación"
+    save: () => {
+        playTone(659.25, 0.15, 'sine', 0);      // Mi5
+    },
+    // Cambio de filtro: click muy corto y discreto
+    click: () => {
+        playTone(880, 0.06, 'square', 0, 0.08); // La5
+    }
+};
+
 // Elementos del DOM
 const expenseForm = document.getElementById('expense-form');
 const descriptionInput = document.getElementById('description');
@@ -109,11 +167,13 @@ setLimitBtn.addEventListener('click', () => {
     if (isNaN(value) || value <= 0) {
         limitStatus.textContent = 'Ingresa un límite válido.';
         limitStatus.style.color = '#e0a800';
+        sounds.warning();
         return;
     }
 
     expenseLimit = value;
     updateLimitStatus();
+    sounds.save();
 });
 
 // Lógica para agregar un nuevo gasto (P2 - Tarea 2, + categoría y fecha P3)
@@ -125,12 +185,16 @@ expenseForm.addEventListener('submit', function(e) {
     const category = categoryInput.value;
     const date = dateInput.value;
 
-    if (description === '' || isNaN(amount) || amount <= 0 || category === '' || date === '') return;
+    if (description === '' || isNaN(amount) || amount <= 0 || category === '' || date === '') {
+        sounds.warning();
+        return;
+    }
 
     // Verificar si el gasto excede el límite disponible (P3 - EXTRA)
     if (expenseLimit !== null) {
         const totalActual = getTotalExpenses();
         if (totalActual + amount > expenseLimit) {
+            sounds.warning();
             const confirmar = confirm(
                 `Este gasto excede tu límite de $${expenseLimit.toFixed(2)}.\n¿Deseas agregarlo de todas formas?`
             );
@@ -153,6 +217,7 @@ expenseForm.addEventListener('submit', function(e) {
     // Actualizar la lista filtrada de gastos (y la gráfica, dentro de renderExpenses)
     renderExpenses();
     updateLimitStatus();
+    sounds.success();
 
     // Limpiar el formulario (y volver a poner la fecha de hoy)
     expenseForm.reset();
@@ -278,6 +343,7 @@ filterButtons.forEach(button => {
     button.addEventListener('click', () => {
         activeFilter = button.dataset.filter;
         setActiveFilterButton(button);
+        sounds.click();
         renderExpenses();
     });
 });
