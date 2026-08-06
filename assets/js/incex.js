@@ -18,7 +18,10 @@ const amountInput = document.getElementById('amount');
 const categoryInput = document.getElementById('category');
 const dateInput = document.getElementById('date');
 const expenseList = document.getElementById('expense-list');
+const filterButtons = document.querySelectorAll('.filter-button');
 const ctx = document.getElementById('expense-chart').getContext('2d');
+
+let activeFilter = 'week';
 
 // Inicialización de Chart.js
 let expenseChart = new Chart(ctx, {
@@ -72,7 +75,7 @@ expenseForm.addEventListener('submit', function(e) {
     // Guardar en el arreglo global
     expenses.push(newExpense);
 
-    // Actualizar la interfaz y la gráfica
+    // Actualizar la lista filtrada de gastos
     renderExpenses();
     updateChart();
 
@@ -87,14 +90,55 @@ function formatDate(isoDate) {
     return `${day}/${month}/${year}`;
 }
 
+function parseLocalDate(dateString) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
+
+function isExpenseInFilter(expense, filter) {
+    const expenseDate = parseLocalDate(expense.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (filter === 'today') {
+        return expenseDate.getTime() === today.getTime();
+    }
+
+    if (filter === 'week') {
+        const weekStart = new Date(today);
+        const dayOfWeek = today.getDay();
+        weekStart.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+        return expenseDate >= weekStart && expenseDate <= today;
+    }
+
+    if (filter === 'month') {
+        return expenseDate.getMonth() === today.getMonth() && expenseDate.getFullYear() === today.getFullYear();
+    }
+
+    return true;
+}
+
+function setActiveFilterButton(selectedButton) {
+    filterButtons.forEach(button => button.classList.toggle('active', button === selectedButton));
+}
+
+// Inicializar botón activo en la lista de filtros
+setActiveFilterButton(document.querySelector('.filter-button.active') || filterButtons[0]);
+
 // Renderizar la lista de gastos en HTML (con categoría y fecha, P3)
 function renderExpenses() {
     expenseList.innerHTML = '';
 
-    // Ordenar del más reciente al más antiguo
-    const sortedExpenses = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const filteredExpenses = expenses
+        .filter(expense => isExpenseInFilter(expense, activeFilter))
+        .sort((a, b) => parseLocalDate(b.date) - parseLocalDate(a.date));
 
-    sortedExpenses.forEach(expense => {
+    if (filteredExpenses.length === 0) {
+        expenseList.innerHTML = '<li class="expense-item empty-message">No hay gastos para este filtro.</li>';
+        return;
+    }
+
+    filteredExpenses.forEach(expense => {
         const li = document.createElement('li');
         li.classList.add('expense-item');
 
@@ -123,3 +167,18 @@ function updateChart() {
     expenseChart.data.datasets[0].borderColor = colors;
     expenseChart.update();
 }
+
+/* 
+    PARA EL SIGUIENTE PROGRAMADOR:
+    SOLO DESCOMENTAR EL SIGUIENTE CÓDIGO PARA EL CORRECTO FUNCIONAMIENTO DEL FILTRO
+ */
+
+/* filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        activeFilter = button.dataset.filter;
+        setActiveFilterButton(button);
+        renderExpenses();
+    });
+}); */
+
+renderExpenses();

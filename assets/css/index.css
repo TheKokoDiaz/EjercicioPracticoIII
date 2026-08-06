@@ -47,6 +47,35 @@ button:hover {
     background-color: #218838;
 }
 
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 16px 0 12px;
+}
+
+.filter-button {
+    flex: 1 1 auto;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f4f4f9;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.filter-button:hover {
+    background: #e9edf7;
+}
+
+.filter-button.active {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
 .chart-container {
     margin-top: 20px;
 }
