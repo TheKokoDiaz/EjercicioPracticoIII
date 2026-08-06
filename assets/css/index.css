@@ -116,3 +116,32 @@ button:hover {
     font-weight: bold;
     color: #28a745;
 }
+
+.chart-section {
+    margin-top: 24px;
+}
+
+.chart-section h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.chart-container {
+    margin-top: 12px;
+    background: linear-gradient(145deg, #ffffff, #f7f9fc);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid #eef0f5;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.chart-container canvas {
+    max-height: 320px;
+}

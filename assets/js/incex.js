@@ -23,7 +23,7 @@ const ctx = document.getElementById('expense-chart').getContext('2d');
 
 let activeFilter = 'week';
 
-// Inicialización de Chart.js
+// Inicialización de Chart.js (con estilo mejorado)
 let expenseChart = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -33,14 +33,56 @@ let expenseChart = new Chart(ctx, {
             data: [],
             backgroundColor: [],
             borderColor: [],
-            borderWidth: 1
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+            maxBarThickness: 48,
+            hoverBackgroundColor: [],
         }]
     },
     options: {
         responsive: true,
+        maintainAspectRatio: true,
+        animation: {
+            duration: 800,
+            easing: 'easeOutQuart'
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: '#1f2937',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                padding: 10,
+                cornerRadius: 8,
+                displayColors: true,
+                callbacks: {
+                    label: (context) => `$${context.parsed.y.toFixed(2)}`
+                }
+            }
+        },
         scales: {
             y: {
-                beginAtZero: true
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0,0,0,0.06)',
+                    drawBorder: false
+                },
+                ticks: {
+                    callback: (value) => `$${value}`,
+                    font: { size: 12 }
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    font: { size: 12, weight: '600' },
+                    color: '#555'
+                }
             }
         }
     }
@@ -165,20 +207,16 @@ function updateChart() {
     expenseChart.data.datasets[0].data = data;
     expenseChart.data.datasets[0].backgroundColor = colors;
     expenseChart.data.datasets[0].borderColor = colors;
+    expenseChart.data.datasets[0].hoverBackgroundColor = colors.map(c => c + 'cc'); // ligera transparencia al hover
     expenseChart.update();
 }
 
-/* 
-    PARA EL SIGUIENTE PROGRAMADOR:
-    SOLO DESCOMENTAR EL SIGUIENTE CÓDIGO PARA EL CORRECTO FUNCIONAMIENTO DEL FILTRO
- */
-
-/* filterButtons.forEach(button => {
+filterButtons.forEach(button => {
     button.addEventListener('click', () => {
         activeFilter = button.dataset.filter;
         setActiveFilterButton(button);
         renderExpenses();
     });
-}); */
+});
 
 renderExpenses();
